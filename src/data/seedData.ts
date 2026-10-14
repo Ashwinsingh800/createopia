@@ -79,7 +79,7 @@ export const SEED_CREATORS: Creator[] = [
         description: 'Verified prompt seeds and motion parameters for award-winning commercial spot.',
         submittedAt: '2026-09-01',
         verifiedAt: '2026-09-04',
-        verifiedBy: 'Createopia Editorial Board',
+        verifiedBy: 'Creatopia Editorial Board',
         status: 'verified',
         reviewerNotes: 'Seeds verified and reproduced. Commercial buyout release checked.'
       }
@@ -107,7 +107,7 @@ export const SEED_CREATORS: Creator[] = [
         title: 'Chronos: The Origin of Time',
         description: 'Cinematic widescreen spec commercial exploring time dilation and gravity.',
         imageUrl: '/src/assets/images/hero_cinematic_film_1791881136552.jpg',
-        videoUrl: '/createopia-portfolio-showcase.mp4',
+        videoUrl: '/creatopia-portfolio-showcase.mp4',
         contentType: 'Brand Film',
         aspectRatio: '16:9',
         toolsUsed: ['Runway Gen-3', 'Midjourney v6.1'],
@@ -151,7 +151,7 @@ export const SEED_CREATORS: Creator[] = [
         description: 'Validated zero-flicker character animation graph with ControlNet OpenPose.',
         submittedAt: '2026-08-15',
         verifiedAt: '2026-08-18',
-        verifiedBy: 'Createopia Technical Review Committee',
+        verifiedBy: 'Creatopia Technical Review Committee',
         status: 'verified',
         reviewerNotes: 'Verified prompt node graph authenticity.'
       }
@@ -174,6 +174,7 @@ export const SEED_CREATORS: Creator[] = [
         title: 'Neon Odyssey Character Sequences',
         description: 'Stylized 3D character animation test with vibrant city backdrop.',
         imageUrl: '/src/assets/images/portfolio_cyber_cinema_1791881136586.jpg',
+        videoUrl: '/woman-hologram-city.mp4',
         contentType: 'Commercial Short',
         aspectRatio: '16:9',
         toolsUsed: ['Pika', 'Stable Diffusion', 'ComfyUI'],
@@ -233,6 +234,7 @@ export const SEED_CREATORS: Creator[] = [
         title: 'Iridescent Cyber Couture',
         description: 'Sculptural digital editorial piece with titanium fabrics.',
         imageUrl: '/src/assets/images/portfolio_surreal_fashion_1791881137083.jpg',
+        videoUrl: '/woman-industrial-hall.mp4',
         contentType: 'Key Visuals',
         aspectRatio: '4:3',
         toolsUsed: ['Midjourney v6', 'Photoshop'],
@@ -275,7 +277,7 @@ export const SEED_CREATORS: Creator[] = [
         description: 'Verified node graph combining procedural pyro particles with Runway Gen-3 video output.',
         submittedAt: '2026-09-05',
         verifiedAt: '2026-09-08',
-        verifiedBy: 'Createopia Technical Review Committee',
+        verifiedBy: 'Creatopia Technical Review Committee',
         status: 'verified',
         reviewerNotes: 'Verified against studio pipeline project.'
       }
@@ -298,7 +300,7 @@ export const SEED_CREATORS: Creator[] = [
         title: 'Bioluminescent Canopy Spec Commercial',
         description: 'Living enchanted jungle with fluid light currents.',
         imageUrl: '/src/assets/images/portfolio_bioluminescent_nature_1791881135764.jpg',
-        videoUrl: '/createopia-forest-showcase.mp4',
+        videoUrl: '/creatopia-forest-showcase.mp4',
         contentType: 'Product Reel',
         aspectRatio: '4:3',
         toolsUsed: ['Runway Gen-3', 'ComfyUI'],
@@ -342,7 +344,7 @@ export const SEED_CREATORS: Creator[] = [
         description: 'Verified raw timeline export with original 24fps frame interpolation, audio multi-track mix, and color grading tree.',
         submittedAt: '2026-09-12',
         verifiedAt: '2026-09-15',
-        verifiedBy: 'Createopia Editorial Board (Lead Reviewer: M. Chen)',
+        verifiedBy: 'Creatopia Editorial Board (Lead Reviewer: M. Chen)',
         status: 'verified',
         reviewerNotes: 'Verified against DaVinci project archive. No stock footage substitution detected.'
       }
@@ -370,6 +372,7 @@ export const SEED_CREATORS: Creator[] = [
         title: 'Sector 7G: Spec Sci-Fi Narrative',
         description: 'An atmospheric sci-fi short focusing on deep corridor tension and anamorphic lens flares.',
         imageUrl: '/src/assets/images/hero_cinematic_film_1791881136552.jpg',
+        videoUrl: '/operative-aims-rifle-corridor.mp4',
         contentType: 'Brand Film',
         aspectRatio: '16:9',
         toolsUsed: ['Runway Gen-3', 'Midjourney v6.1', 'DaVinci Resolve'],
@@ -414,7 +417,7 @@ export const SEED_CREATORS: Creator[] = [
         description: 'Provided layered source files with frequency separation passes and lighting adjustment layers.',
         submittedAt: '2026-08-20',
         verifiedAt: '2026-08-23',
-        verifiedBy: 'Createopia Editorial Board',
+        verifiedBy: 'Creatopia Editorial Board',
         status: 'verified',
         reviewerNotes: 'Verified authentic working file with proprietary grading curve.'
       }
@@ -432,6 +435,7 @@ export const SEED_CREATORS: Creator[] = [
         title: 'Chrysalis: Architectural Couture',
         description: 'Avant-garde sculptural garment exploring iridescent metallic ribs and chiaroscuro warehouse lighting.',
         imageUrl: '/src/assets/images/portfolio_surreal_fashion_1791881137083.jpg',
+        videoUrl: '/woman-industrial-hall.mp4',
         contentType: 'Key Visuals',
         aspectRatio: '4:3',
         toolsUsed: ['FLUX.1', 'Magnific AI', 'Photoshop'],
@@ -490,7 +494,7 @@ export const SEED_CREATORS: Creator[] = [
         title: 'Lumina Nocturna: Living Forest',
         description: 'A tranquil twilight forest where flora illuminates in harmony with water currents.',
         imageUrl: '/src/assets/images/portfolio_bioluminescent_nature_1791881135764.jpg',
-        videoUrl: '/createopia-forest-showcase.mp4',
+        videoUrl: '/creatopia-forest-showcase.mp4',
         contentType: 'Product Reel',
         aspectRatio: '4:3',
         toolsUsed: ['ComfyUI', 'AnimateDiff', 'Kling 1.5'],
@@ -549,6 +553,7 @@ export const SEED_CREATORS: Creator[] = [
         title: 'Neo-Tokyo Rainy Street Volume',
         description: 'A dynamic LED volume background for a commercial shoot with interactive water reflections.',
         imageUrl: '/src/assets/images/portfolio_cyber_cinema_1791881136586.jpg',
+        videoUrl: '/woman-hologram-city.mp4',
         contentType: 'Virtual Production',
         aspectRatio: '4:3',
         toolsUsed: ['Unreal Engine 5', 'Runway Gen-3', 'ComfyUI'],
@@ -591,7 +596,7 @@ export const SEED_CREATORS: Creator[] = [
         description: 'Verified 8K uncompressed TIFF master deliverables with full seed reproducibility documentation.',
         submittedAt: '2026-09-18',
         verifiedAt: '2026-09-22',
-        verifiedBy: 'Createopia Editorial Board',
+        verifiedBy: 'Creatopia Editorial Board',
         status: 'verified',
         reviewerNotes: 'Photoreal skin textures and lighting passes verified.'
       }
@@ -614,6 +619,7 @@ export const SEED_CREATORS: Creator[] = [
         title: 'Luminescence: High Jewelry Campaign',
         description: 'Refined key visuals for international luxury jewelry house.',
         imageUrl: '/src/assets/images/portfolio_surreal_fashion_1791881137083.jpg',
+        videoUrl: '/woman-industrial-hall.mp4',
         contentType: 'Key Visuals',
         aspectRatio: '4:3',
         toolsUsed: ['FLUX.1', 'Magnific AI', 'Photoshop'],
@@ -656,7 +662,7 @@ export const SEED_CREATORS: Creator[] = [
         description: 'Full audio stem alignment and 60fps frame interpolated video file with raw export manifests.',
         submittedAt: '2026-09-25',
         verifiedAt: '2026-09-28',
-        verifiedBy: 'Createopia Technical Review Committee',
+        verifiedBy: 'Creatopia Technical Review Committee',
         status: 'verified',
         reviewerNotes: 'Verified commercial broadcast suitability.'
       }
@@ -679,6 +685,7 @@ export const SEED_CREATORS: Creator[] = [
         title: 'Velocity: Electric Moto Spec Ad',
         description: 'Fast-paced urban motorcycle spec commercial with neon motion trails.',
         imageUrl: '/src/assets/images/hero_cinematic_film_1791881136552.jpg',
+        videoUrl: '/operative-aims-rifle-corridor.mp4',
         contentType: 'Commercial Short',
         aspectRatio: '16:9',
         toolsUsed: ['Kling 1.5', 'Runway Gen-3', 'DaVinci Resolve'],

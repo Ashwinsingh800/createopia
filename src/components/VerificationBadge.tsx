@@ -127,7 +127,7 @@ export const VerificationBadge: React.FC<VerificationBadgeProps> = ({
                 </div>
                 <p className="leading-relaxed text-xs">
                   {status === 'verified'
-                    ? 'Only displays "Verified" after an authorized Createopia reviewer inspects raw project files, project seeds, or working timelines.'
+                    ? 'Only displays "Verified" after an authorized Creatopia reviewer inspects raw project files, project seeds, or working timelines.'
                     : status === 'evidence_submitted'
                     ? 'The creator has submitted technical evidence (node graphs, raw project files, screen captures). A human reviewer is validating.'
                     : 'Information has been stated by the creator without independent verification.'}

@@ -27,6 +27,7 @@ import { Creator, CreativeBrief, User, MatchResult, VerificationStatus } from '.
 import { VerificationBadge } from '../components/VerificationBadge';
 import { StorageService } from '../services/storage';
 import { useTheme } from '../context/ThemeContext';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface ExplorePageProps {
   creators: Creator[];
@@ -1260,18 +1261,29 @@ export const ExplorePage: React.FC<ExplorePageProps> = ({
             </div>
           )}
 
-          {/* Creators Card Grid */}
+          {/* Creators Card Grid with Motion Reveal & Hover Physics */}
           {filteredCreators.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
-              {filteredCreators.map((creator) => {
-                const isSaved = shortlist.includes(creator.id);
-                const matchInfo = matchResultsMap.get(creator.id);
+              <AnimatePresence>
+                {filteredCreators.map((creator, i) => {
+                  const isSaved = shortlist.includes(creator.id);
+                  const matchInfo = matchResultsMap.get(creator.id);
 
-                return (
-                  <div
-                    key={creator.id}
-                    className="bg-[#121622] rounded-2xl border border-[#232838] overflow-hidden hover:border-[#E60067] transition-all flex flex-col group shadow-md"
-                  >
+                  return (
+                    <motion.div
+                      key={creator.id}
+                      layout
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{
+                        duration: 0.3,
+                        delay: Math.min(i * 0.03, 0.25),
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                      className="bg-[#121622] rounded-2xl border border-[#232838] overflow-hidden hover:border-[#E60067] transition-colors flex flex-col group shadow-md"
+                    >
                     {/* Media Thumbnail */}
                     <div
                       onClick={() => onSelectCreator(creator.id)}
@@ -1456,9 +1468,10 @@ export const ExplorePage: React.FC<ExplorePageProps> = ({
                         </button>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
+              </AnimatePresence>
             </div>
           ) : (
             /* Empty State */

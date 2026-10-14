@@ -18,6 +18,7 @@ import {
 const STORAGE_KEYS = {
   USERS: 'pixelforge_users_v4',
   CURRENT_USER: 'pixelforge_current_user_v4',
+  CREDENTIALS: 'pixelforge_credentials_v1',
   CREATORS: 'pixelforge_creators_v4',
   BRIEFS: 'pixelforge_briefs_v4',
   ENGAGEMENTS: 'pixelforge_engagements_v4',
@@ -26,6 +27,12 @@ const STORAGE_KEYS = {
 
 export const StorageService = {
   // ---- USERS & AUTH ----
+  async hashPassword(password: string): Promise<string> {
+    const data = new TextEncoder().encode(password);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+  },
+
   getUsers(): User[] {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.USERS);
@@ -69,6 +76,8 @@ export const StorageService = {
       role,
       name: name.trim(),
       organizationName: role === 'brand' ? organizationName?.trim() : undefined,
+      onboardingCompleted: true,
+      onboardingGoal: 'Getting started',
       createdAt: new Date().toISOString().split('T')[0],
     };
 
@@ -86,6 +95,34 @@ export const StorageService = {
     }
     this.setCurrentUser(existing);
     return existing;
+  },
+
+  async registerUserWithPassword(
+    email: string,
+    password: string,
+    role: 'brand' | 'creator',
+    name: string,
+    organizationName?: string
+  ): Promise<User> {
+    const user = this.registerUser(email, role, name, organizationName);
+    const credentials = JSON.parse(localStorage.getItem(STORAGE_KEYS.CREDENTIALS) || '{}') as Record<string, string>;
+    credentials[user.email] = await this.hashPassword(password);
+    localStorage.setItem(STORAGE_KEYS.CREDENTIALS, JSON.stringify(credentials));
+    return user;
+  },
+
+  async authenticateUser(email: string, password: string): Promise<User> {
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = this.getUsers().find((candidate) => candidate.email.toLowerCase() === normalizedEmail);
+    if (!user) throw new Error('No account found with this email. Please sign up first.');
+
+    const credentials = JSON.parse(localStorage.getItem(STORAGE_KEYS.CREDENTIALS) || '{}') as Record<string, string>;
+    const storedHash = credentials[normalizedEmail];
+    if (!storedHash || storedHash !== await this.hashPassword(password)) {
+      throw new Error('Incorrect email or password.');
+    }
+    this.setCurrentUser(user);
+    return user;
   },
 
   signOut(): void {
@@ -117,9 +154,17 @@ export const StorageService = {
           ...creator,
           portfolio: creator.portfolio.map((item) =>
             item.id === 'p-luna-1' && !item.videoUrl
-              ? { ...item, videoUrl: '/createopia-portfolio-showcase.mp4' }
+              ? { ...item, videoUrl: '/creatopia-portfolio-showcase.mp4' }
               : (item.id === 'p-df-1' || item.id === 'p-4') && !item.videoUrl
-              ? { ...item, videoUrl: '/createopia-forest-showcase.mp4' }
+              ? { ...item, videoUrl: '/creatopia-forest-showcase.mp4' }
+              : (item.id === 'p-byte-1' || item.id === 'p-5') && !item.videoUrl
+              ? { ...item, videoUrl: '/woman-hologram-city.mp4' }
+              : (item.id === 'p-neon-1' || item.id === 'p-3' || item.id === 'p-zara-1') && !item.videoUrl
+              ? { ...item, videoUrl: '/woman-industrial-hall.mp4' }
+              : item.id === 'p-leo-1' && !item.videoUrl
+              ? { ...item, videoUrl: '/operative-aims-rifle-corridor.mp4' }
+              : item.id === 'p-1' && !item.videoUrl
+              ? { ...item, videoUrl: '/operative-aims-rifle-corridor.mp4' }
               : item
           ),
         }));
@@ -169,7 +214,7 @@ export const StorageService = {
             ...evidenceList[0],
             status,
             verifiedAt: status === 'verified' ? new Date().toISOString().split('T')[0] : undefined,
-            verifiedBy: status === 'verified' ? 'Createopia Editorial Board (Authorized)' : undefined,
+            verifiedBy: status === 'verified' ? 'Creatopia Editorial Board (Authorized)' : undefined,
             reviewerNotes:
               reviewerNote ||
               (status === 'verified'

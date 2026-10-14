@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AuthMode, PageView, Creator, User, CreativeBrief } from './types';
 import { StorageService } from './services/storage';
 import { useTheme } from './context/ThemeContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { CreativeCopilot } from './components/CreativeCopilot';
+import { AnimatedBackground } from './components/AnimatedBackground';
 import { HomePage } from './pages/HomePage';
 import { ExplorePage } from './pages/ExplorePage';
 import { CreatorProfilePage } from './pages/CreatorProfilePage';
 import { CreateBriefPage } from './pages/CreateBriefPage';
 import { ProjectsPage } from './pages/ProjectsPage';
 import { AuthPage } from './pages/AuthPage';
-import { OnboardingPage } from './pages/OnboardingPage';
 import { WelcomePage } from './pages/WelcomePage';
-import { supabase } from './services/supabase';
 import { MessageCircle } from 'lucide-react';
+import { ScrollProgress, CursorGlow, PageTransition, AnimatePresence } from './components/MotionComponents';
 
 export default function App() {
   const [showWelcome, setShowWelcome] = useState(() => {
@@ -28,8 +28,7 @@ export default function App() {
     StorageService.getCurrentUser()
   );
   const [currentPage, setCurrentPage] = useState<PageView>(() => {
-    const user = StorageService.getCurrentUser();
-    return user && !user.onboardingCompleted ? 'onboarding' : 'home';
+    return 'home';
   });
   const [authMode, setAuthMode] = useState<AuthMode>('sign_in');
   const [creators, setCreators] = useState<Creator[]>(() =>
@@ -51,60 +50,49 @@ export default function App() {
   // Active brief filter for Explore creators
   const [activeBriefFilter, setActiveBriefFilter] = useState<CreativeBrief | null>(null);
   const [exploreInitialShortlist, setExploreInitialShortlist] = useState(false);
+  const historyReadyRef = useRef(false);
+  const restoringHistoryRef = useRef(false);
+
+  const getHistoryState = () => ({
+    app: 'creatopia',
+    showWelcome,
+    currentPage,
+    authMode,
+    selectedCreatorId,
+  });
 
   useEffect(() => {
-    const client = supabase;
-    if (!client) return;
-    let mounted = true;
-    const restore = async () => {
-      const { data } = await client.auth.getSession();
-      if (!mounted || !data.session?.user) return;
-      const authUser = data.session.user;
-      const { data: profile } = await client
-        .from('profiles')
-        .select('name, role, onboarding_goal, onboarding_completed')
-        .eq('id', authUser.id)
-        .maybeSingle();
-      if (!mounted) return;
-      const metadataRole =
-        authUser.user_metadata?.role === 'creator' || authUser.user_metadata?.role === 'brand'
-          ? authUser.user_metadata.role
-          : null;
-      const resolvedProfile = profile || (metadataRole
-        ? {
-            name: String(authUser.user_metadata?.full_name || ''),
-            role: metadataRole,
-            onboarding_goal: 'Getting started',
-            onboarding_completed: true,
-          }
-        : null);
-      if (!profile && resolvedProfile) {
-        await client.from('profiles').upsert({
-          id: authUser.id,
-          ...resolvedProfile,
-        });
+    if (!historyReadyRef.current) {
+      window.history.replaceState(getHistoryState(), '', window.location.href);
+      historyReadyRef.current = true;
+      return;
+    }
+
+    if (restoringHistoryRef.current) {
+      restoringHistoryRef.current = false;
+      return;
+    }
+
+    window.history.pushState(getHistoryState(), '', window.location.href);
+  }, [showWelcome, currentPage, authMode, selectedCreatorId]);
+
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      const state = event.state;
+      if (!state || state.app !== 'creatopia') {
+        window.history.pushState(getHistoryState(), '', window.location.href);
+        return;
       }
-      const user: User = {
-        id: authUser.id,
-        email: authUser.email || '',
-        role: resolvedProfile?.role || null,
-        name: resolvedProfile?.name || authUser.user_metadata?.full_name || '',
-        onboardingGoal: resolvedProfile?.onboarding_goal,
-        onboardingCompleted: resolvedProfile?.onboarding_completed || false,
-        createdAt: authUser.created_at.split('T')[0],
-      };
-      setCurrentUser(user);
-      setShowWelcome(false);
-      setCurrentPage(user.onboardingCompleted ? 'home' : 'onboarding');
+
+      restoringHistoryRef.current = true;
+      setShowWelcome(Boolean(state.showWelcome));
+      setCurrentPage(state.currentPage || 'home');
+      setAuthMode(state.authMode || 'sign_in');
+      setSelectedCreatorId(state.selectedCreatorId || null);
     };
-    void restore();
-    const { data: authListener } = client.auth.onAuthStateChange(() => {
-      void restore();
-    });
-    return () => {
-      mounted = false;
-      authListener.subscription.unsubscribe();
-    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   // Scroll to top on page transition
@@ -199,20 +187,9 @@ export default function App() {
 
   const handleAuthSuccess = (user: User) => {
     setCurrentUser(user);
-    if (!user.onboardingCompleted) {
-      setCurrentPage('onboarding');
-      return;
-    }
-    if (user.role === 'brand') {
-      setCurrentPage('explore');
-    } else {
-      if (user.creatorProfileId) {
-        setSelectedCreatorId(user.creatorProfileId);
-        setCurrentPage('creator');
-      } else {
-        setCurrentPage('explore');
-      }
-    }
+    setShowWelcome(false);
+    setSelectedCreatorId(null);
+    setCurrentPage('home');
   };
 
   const handleDemoSuccess = (user: User) => {
@@ -222,20 +199,8 @@ export default function App() {
     setCurrentPage('home');
   };
 
-  const handleOnboardingComplete = (user: User) => {
-    setCurrentUser(user);
-    if (user.role === 'creator' && user.creatorProfileId) {
-      setCreators(StorageService.getCreators());
-      setSelectedCreatorId(user.creatorProfileId);
-      setCurrentPage('creator');
-    } else {
-      setCurrentPage('explore');
-    }
-  };
-
   const handleSignOut = () => {
     StorageService.signOut();
-    void supabase?.auth.signOut();
     try {
       sessionStorage.removeItem('pixelforge_welcome_seen');
     } catch {
@@ -276,6 +241,15 @@ export default function App() {
         isDark ? 'bg-[#0B0E14] text-[#F8FAFC]' : 'bg-[#F7F6F2] text-[#242424]'
       }`}
     >
+      {/* Dynamic top scroll progress bar */}
+      <ScrollProgress color="linear-gradient(90deg, #E60067 0%, #8B5CF6 50%, #00C9FF 100%)" height={3} />
+
+      {/* Ambient mouse spotlight glow */}
+      <CursorGlow color={isDark ? 'rgba(230, 0, 103, 0.12)' : 'rgba(101, 86, 217, 0.08)'} />
+
+      {/* Animated particle/grid background */}
+      <AnimatedBackground />
+
       {/* Role-Specific Navigation Bar */}
       {currentPage !== 'onboarding' && currentPage !== 'auth' && <Navbar
         currentPage={currentPage}
@@ -292,86 +266,80 @@ export default function App() {
         projectsCount={projectsCount}
       />}
 
-      {/* Main Content Area */}
-      <main key={currentPage} className="flex-1 pf-route">
-        {currentPage === 'home' && (
-          <HomePage
-            creators={creators}
-            currentUser={currentUser}
-            onNavigate={handleNavigate}
-            onSelectCreator={handleSelectCreator}
-            onOpenCopilot={() => setIsCopilotOpen(true)}
-            onOpenAuth={(mode) => {
-              setAuthMode(mode);
-              setCurrentPage('auth');
-            }}
-          />
-        )}
+      {/* Main Content Area with Smooth Page Transition */}
+      <AnimatePresence mode="wait">
+        <PageTransition key={currentPage} className="flex-1 pf-route flex flex-col">
+          {currentPage === 'home' && (
+            <HomePage
+              creators={creators}
+              currentUser={currentUser}
+              onNavigate={handleNavigate}
+              onSelectCreator={handleSelectCreator}
+              onOpenCopilot={() => setIsCopilotOpen(true)}
+              onOpenAuth={(mode) => {
+                setAuthMode(mode);
+                setCurrentPage('auth');
+              }}
+            />
+          )}
 
-        {currentPage === 'explore' && (
-          <ExplorePage
-            creators={creators}
-            onSelectCreator={handleSelectCreator}
-            shortlist={shortlist}
-            onToggleShortlist={handleToggleShortlist}
-            currentUser={currentUser}
-            onRequireAuth={() => setCurrentPage('auth')}
-            activeBriefFilter={activeBriefFilter}
-            onClearBriefFilter={() => setActiveBriefFilter(null)}
-            initialShowShortlisted={exploreInitialShortlist}
-          />
-        )}
+          {currentPage === 'explore' && (
+            <ExplorePage
+              creators={creators}
+              onSelectCreator={handleSelectCreator}
+              shortlist={shortlist}
+              onToggleShortlist={handleToggleShortlist}
+              currentUser={currentUser}
+              onRequireAuth={() => setCurrentPage('auth')}
+              activeBriefFilter={activeBriefFilter}
+              onClearBriefFilter={() => setActiveBriefFilter(null)}
+              initialShowShortlisted={exploreInitialShortlist}
+            />
+          )}
 
-        {currentPage === 'creator' && selectedCreator && (
-          <CreatorProfilePage
-            creator={selectedCreator}
-            currentUser={currentUser}
-            onBack={() => handleNavigate('explore')}
-            onInviteToBrief={handleInviteToBrief}
-            isShortlisted={shortlist.includes(selectedCreator.id)}
-            onToggleShortlist={handleToggleShortlist}
-            onCreatorUpdated={handleCreatorUpdated}
-            onRequireAuth={() => setCurrentPage('auth')}
-          />
-        )}
+          {currentPage === 'creator' && selectedCreator && (
+            <CreatorProfilePage
+              creator={selectedCreator}
+              currentUser={currentUser}
+              onBack={() => handleNavigate('explore')}
+              onInviteToBrief={handleInviteToBrief}
+              isShortlisted={shortlist.includes(selectedCreator.id)}
+              onToggleShortlist={handleToggleShortlist}
+              onCreatorUpdated={handleCreatorUpdated}
+              onRequireAuth={() => setCurrentPage('auth')}
+            />
+          )}
 
-        {currentPage === 'brief' && (
-          <CreateBriefPage
-            invitedCreator={invitedCreator}
-            currentUser={currentUser}
-            onClearInvitedCreator={() => setInvitedCreator(null)}
-            onNavigate={handleNavigate}
-            onRequireAuth={() => setCurrentPage('auth')}
-            prefilledBriefData={prefilledBriefData}
-            onMatchCreatorsForBrief={handleMatchCreatorsForBrief}
-          />
-        )}
+          {currentPage === 'brief' && (
+            <CreateBriefPage
+              invitedCreator={invitedCreator}
+              currentUser={currentUser}
+              onClearInvitedCreator={() => setInvitedCreator(null)}
+              onNavigate={handleNavigate}
+              onRequireAuth={() => setCurrentPage('auth')}
+              prefilledBriefData={prefilledBriefData}
+              onMatchCreatorsForBrief={handleMatchCreatorsForBrief}
+            />
+          )}
 
-        {currentPage === 'projects' && (
-          <ProjectsPage
-            currentUser={currentUser}
-            onNavigate={handleNavigate}
-            onRequireAuth={() => setCurrentPage('auth')}
-          />
-        )}
+          {currentPage === 'projects' && (
+            <ProjectsPage
+              currentUser={currentUser}
+              onNavigate={handleNavigate}
+              onRequireAuth={() => setCurrentPage('auth')}
+            />
+          )}
 
-        {currentPage === 'auth' && (
-          <AuthPage
-            initialMode={authMode}
-            onSuccess={handleAuthSuccess}
-            onDemoSuccess={handleDemoSuccess}
-            onCancel={() => setCurrentPage('home')}
-          />
-        )}
-
-        {currentPage === 'onboarding' && (
-          <OnboardingPage
-            user={currentUser}
-            onRequireAuth={() => setCurrentPage('auth')}
-            onComplete={handleOnboardingComplete}
-          />
-        )}
-      </main>
+          {currentPage === 'auth' && (
+            <AuthPage
+              initialMode={authMode}
+              onSuccess={handleAuthSuccess}
+              onDemoSuccess={handleDemoSuccess}
+              onCancel={() => setCurrentPage('home')}
+            />
+          )}
+        </PageTransition>
+      </AnimatePresence>
 
       {/* Compact Restrained Footer */}
       {currentPage !== 'onboarding' && currentPage !== 'auth' && <Footer
@@ -384,7 +352,7 @@ export default function App() {
           type="button"
           className="pf-copilot-launcher"
           onClick={() => setIsCopilotOpen(true)}
-          aria-label="Open Createopia AI assistant"
+          aria-label="Open Creatopia AI assistant"
           title="Open AI assistant"
         >
           <MessageCircle aria-hidden="true" />

@@ -72,7 +72,7 @@ app.post('/api/brief/generate', async (req, res) => {
       return res.status(400).json({ error: 'Please provide a creative idea description.' });
     }
 
-    const systemPrompt = `You are a Senior Creative Director at Createopia, an elite AI Creator Marketplace.
+    const systemPrompt = `You are a Senior Creative Director at Creatopia, an elite AI Creator Marketplace.
 A brand has provided a rough creative idea. Transform this idea into a structured, production-ready creative brief for AI filmmakers and visual artists.
 CRITICAL INSTRUCTION: Do NOT hallucinate or invent specific arbitrary details that were unstated (e.g., if the user didn't mention a deadline, flag it as a missing requirement rather than inventing an exact calendar date).
 Return ONLY a valid JSON object with the following fields:
@@ -131,7 +131,7 @@ app.post('/api/copilot/chat', async (req, res) => {
       return res.status(400).json({ error: 'Send between 1 and 20 conversation messages.' });
     }
 
-    const systemPrompt = `You are the Createopia Creative Copilot, an expert AI prompt engineer and creative producer.
+    const systemPrompt = `You are the Creatopia Creative Copilot, an expert AI prompt engineer and creative producer.
 You help brands and directors generate high-converting, reproducible prompts for state-of-the-art AI video and image models (Runway Gen-3, Sora, Kling, Midjourney v6, ComfyUI, FLUX.1).
 Task type requested: ${promptType}.
 
@@ -211,7 +211,7 @@ async function startServer() {
   }
 
   app.listen(port, () => {
-    console.log(`Createopia server running on port ${port}`);
+    console.log(`Creatopia server running on port ${port}`);
   });
 }
 

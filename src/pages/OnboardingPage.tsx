@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, Building2, Check, Palette, Sparkles } from 'lucide-react';
 import { Creator, User, UserRole } from '../types';
 import { StorageService } from '../services/storage';
-import { saveSupabaseOnboarding } from '../services/supabase';
 import { useTheme } from '../context/ThemeContext';
 
 interface OnboardingPageProps {
@@ -76,13 +75,6 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
     setSaving(true);
     setError('');
     try {
-      await saveSupabaseOnboarding(user.id, {
-        name: name.trim(),
-        role,
-        onboarding_goal: goal,
-        onboarding_completed: true,
-      });
-
       let updatedUser = StorageService.updateUserProfile(user.id, {
         name: name.trim(),
         role,
@@ -156,7 +148,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
       <div className="onboarding-wrap">
         <div className="onboarding-topline">
           <span className="flex items-center gap-2 text-sm font-semibold tracking-tight">
-            <Sparkles size={16} className="text-[#6556D9]" /> Createopia
+            <Sparkles size={16} className="text-[#6556D9]" /> Creatopia
           </span>
           <span className="text-xs text-[var(--text-secondary)]">A few thoughtful questions</span>
         </div>
@@ -248,7 +240,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
                   <ArrowLeft size={16} /> Back
                 </button>
                 <button type="button" onClick={continueStep} disabled={saving} className="onboarding-continue">
-                  {saving ? 'Saving…' : step === 2 ? 'Enter Createopia' : 'Continue'} <ArrowRight size={16} />
+                  {saving ? 'Saving…' : step === 2 ? 'Enter Creatopia' : 'Continue'} <ArrowRight size={16} />
                 </button>
               </div>
             </>

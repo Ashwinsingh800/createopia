@@ -1,5 +1,5 @@
 {
-  "name": "Createopia",
+  "name": "Creatopia",
   "description": "AI Content Creator Marketplace connecting brands with premier AI filmmakers, animators, and visual artists.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

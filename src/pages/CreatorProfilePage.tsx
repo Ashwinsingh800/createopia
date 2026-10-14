@@ -215,7 +215,7 @@ export const CreatorProfilePage: React.FC<CreatorProfilePageProps> = ({
             </span>
           </div>
           <p className="text-[#94A3B8] text-xs">
-            Createopia policy: Creators can submit evidence, but only authorized human reviewers can approve "Verified" status.
+            Creatopia policy: Creators can submit evidence, but only authorized human reviewers can approve "Verified" status.
           </p>
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <button type="button" onClick={() => handleStatusChangeByReviewer('self_reported')} className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${currentStatus === 'self_reported' ? 'bg-white text-black' : 'bg-[#1A1F2E] text-white border border-[#232838] hover:bg-[#2A3246]'}`}>

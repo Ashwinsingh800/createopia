@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Sparkles, ArrowRight, ShieldCheck, Check, AlertCircle, Building2, Palette } from 'lucide-react';
 import { AuthMode, UserRole, User, Creator } from '../types';
 import { StorageService } from '../services/storage';
-import { supabase } from '../services/supabase';
 
 function getAuthErrorMessage(error: unknown, mode: AuthMode): string {
   const message = error instanceof Error ? error.message.toLowerCase() : String(error || '').toLowerCase();
@@ -84,63 +83,24 @@ export const AuthPage: React.FC<AuthPageProps> = ({
     setLoading(true);
     setError(null);
     try {
-      if (!supabase) {
-        throw new Error('Password login is not configured. Add Supabase settings first.');
-      }
       if (flow === 'sign_up') {
-        const { data, error: signupError } = await supabase.auth.signUp({
-          email: email.trim(),
+        const user = await StorageService.registerUserWithPassword(
+          email,
           password,
-          options: { emailRedirectTo: window.location.origin, data: { full_name: fullName.trim(), role } },
-        });
-        if (signupError) throw signupError;
-        if (data.session && data.user) {
-          await finishSupabaseLogin(data.user, role || 'brand');
-        } else {
-          setVerificationSent(true);
-        }
+          role || 'brand',
+          fullName,
+          organizationName
+        );
+        onSuccess(user);
       } else {
-        const { data, error: signinError } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
-        if (signinError || !data.user) throw signinError || new Error('Invalid login credentials');
-        await finishSupabaseLogin(data.user);
+        const user = await StorageService.authenticateUser(email, password);
+        onSuccess(user);
       }
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err, flow === 'sign_up' ? 'sign_up' : 'sign_in'));
     } finally {
       setLoading(false);
     }
-  };
-
-  const finishSupabaseLogin = async (authUser: { id: string; email?: string; created_at: string; user_metadata?: Record<string, unknown> }, signupRole?: 'brand' | 'creator') => {
-    if (!supabase) throw new Error('Supabase is not configured.');
-    const role = signupRole || undefined;
-    if (signupRole) {
-      const { error: profileError } = await supabase.from('profiles').upsert({
-        id: authUser.id,
-        name: fullName.trim() || String(authUser.user_metadata?.full_name || ''),
-        role,
-        onboarding_goal: 'Getting started',
-        onboarding_completed: true,
-      });
-      if (profileError) throw new Error('Your account was created, but profile setup could not be completed.');
-    }
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('name, role, onboarding_goal, onboarding_completed')
-      .eq('id', authUser.id)
-      .maybeSingle();
-    onSuccess({
-      id: authUser.id,
-      email: authUser.email || email.trim(),
-      role: profile?.role || role || null,
-      name: profile?.name || String(authUser.user_metadata?.full_name || ''),
-      onboardingGoal: profile?.onboarding_goal,
-      onboardingCompleted: profile?.onboarding_completed || false,
-      createdAt: authUser.created_at.split('T')[0],
-    });
   };
 
   // Quick Demo Logins for fast evaluation
@@ -176,14 +136,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
       setLoading(true);
       void (async () => {
         try {
-          if (!supabase) {
-            throw new Error('Password recovery is not configured. Add the Supabase environment variables first.');
-          }
-          const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-            redirectTo: `${window.location.origin}/`,
-          });
-          if (resetError) throw new Error(resetError.message);
-          setResetSent(true);
+          throw new Error('Password reset requires an email service and is not available in browser-only mode. Please create a new account or contact support.');
         } catch (err: unknown) {
           setError(err instanceof Error ? err.message : 'Could not send the password reset email.');
         } finally {
@@ -233,7 +186,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
     <div className="auth-page">
       <div className="auth-layout">
         <section className="auth-form-panel">
-          <div className="auth-brand">CREATEOPIA ACCESS</div>
+          <div className="auth-brand">CREATOPIA ACCESS</div>
         {/* Brand Header */}
         <div className="auth-heading">
 
@@ -251,7 +204,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
           )}
           <h1 className="text-3xl font-black text-[#334FC0]">
             {mode === 'sign_in'
-              ? 'Sign in to Createopia'
+              ? 'Sign in to Creatopia'
               : mode === 'sign_up'
               ? 'Create your account'
               : 'Reset your password'}
@@ -499,7 +452,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
           )}
         </div>
         </section>
-        <aside className="auth-media-panel" aria-label="Createopia creative workspace preview">
+        <aside className="auth-media-panel" aria-label="Creatopia creative workspace preview">
           <video
             className="auth-media-video"
             src="/auth-background.mp4"
@@ -510,7 +463,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
           />
           <div className="auth-media-overlay" />
           <div className="auth-media-caption">
-            <span>Createopia</span>
+            <span>Creatopia</span>
             <strong>Make ambitious creative work feel possible.</strong>
           </div>
         </aside>
